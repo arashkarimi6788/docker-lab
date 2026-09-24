@@ -48,6 +48,11 @@ def list_items():
     return jsonify([{"id": r[0], "name": r[1]} for r in rows])
 
 
+@app.route("/health")
+def health():
+    return {"status": "ok"}, 200
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
 
