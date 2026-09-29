@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    # Test-only values. The real .env stays local and is never committed.
+    env:
+      POSTGRES_DB: appdb
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: ci-test-password
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Build and start the stack
+        run: docker compose up -d --build --wait
+
+      - name: Run smoke tests
+        run: ./scripts/smoke_test.sh
+
+      - name: Show container logs on failure
+        if: failure()
+        run: docker compose logs
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v
